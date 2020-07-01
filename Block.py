@@ -9,18 +9,13 @@ class Block:
         self.transactions = transactions
         self.previousHash = previousHash
         self.nonce = 0
-        self.hash = self.calculateHash()
 
 
     def calculateHash(self):
         return hashlib.sha256(json.dumps(self.__dict__).encode()).hexdigest()
 
     def __repr__(self):
-        return json.dumps({'timestamp': self.timestamp,
-                           'transaction': self.transactions,
-                           'hash': self.hash,
-                           'previousHash': self.previousHash,
-                           'nonce': self.nonce})
+        return json.dumps(self.__dict__)
 
     def proof_of_work(self):
         computed_hash = str(self.calculateHash())
@@ -31,14 +26,14 @@ class Block:
         return computed_hash
 
 
-block = Block(time(),
-              {'fromAddress': 'Andy',
-               'toAddress': 'Betty',
-               'amount': 100},
-              "0")
-
-
-print(block.proof_of_work())
+# block = Block(time(),
+#               {'fromAddress': 'Andy',
+#                'toAddress': 'Betty',
+#                'amount': 100},
+#               "0")
+#
+#
+# print(block.proof_of_work())
 
 
 # print(hashlib.sha256(json.dumps(block.__dict__).encode()).hexdigest())

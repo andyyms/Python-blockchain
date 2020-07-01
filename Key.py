@@ -29,9 +29,9 @@ publicKeyVerifyObject = ecdsa.VerifyingKey.from_string(bytes.fromhex(binascii.he
                                                        curve=ecdsa.SECP256k1,
                                                        hashfunc=hashlib.sha256)
 
-print(f'private key: {binascii.hexlify((signing_key.to_string()))}')
-print("public key:", binascii.hexlify(public_key.to_string()))
-print("public key:", binascii.hexlify(publicKeyVerifyObject.to_string()))
+# print(f'private key: {binascii.hexlify((signing_key.to_string()))}')
+# print("public key:", binascii.hexlify(public_key.to_string()))
+# print("public key:", binascii.hexlify(publicKeyVerifyObject.to_string()))
 
 # a message to sign
 name = "lastpeony"
@@ -43,7 +43,7 @@ signature = signing_key.sign(json.dumps({"sender_address": "Andy Yeung",
                               "amount": "10"},
                                         indent=4).encode())
 
-print(f'signature: {binascii.hexlify(signature)}')
+# print(f'signature: {binascii.hexlify(signature)}')
 
 is_valid = public_key.verify(signature, json.dumps({"sender_address": "Andy Yeung",
                               "receipent": "Fanny Leung",

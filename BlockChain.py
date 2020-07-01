@@ -2,10 +2,7 @@ from Block import *
 from Transaction import *
 from datetime import date
 from uuid import uuid4
-from flask import Flask, request
-import requests
-import ecdsa
-import binascii
+from flask import Flask, render_template, jsonify
 import hashlib
 import json
 import logging
@@ -22,15 +19,28 @@ class BlockChain:
         # self.node_id = str(uuid4()).replace('-', '')
         # # Create genesis block
 
-    def last_chain(self):
+    @property
+    def last_block(self):
         return self.chain[-1]
 
     def genesisBlock(self):
         return Block(date.today(), {}, "0")
 
 
-    def add_block(self):
-        pass
+    def add_block(self, block, proof):
+        if block.previousHash != self.last_block.hash:
+            return False
+
+        if not self.is_valid_chain(block, proof):
+            return False
+
+        block.hash = proof
+        self.chain.append(block)
+        return True
+
+    def is_valid_proof(self, block, block_hash):
+        return (block_hash.startswith('0' * MINING_DIFFICULTY)) and \
+                block_hash == block.calculateHash()
 
     def proof_of_work(self):
         block = self.chain[-1]
@@ -87,13 +97,27 @@ class BlockChain:
 
 
     def mine(self):
-        pass
+        # Stop mining if no pending transaction
+        if not self.transactions:
+            return False
 
+        last_block = self.last_block
 
+        new_block = Block(timestamp=time(),
+                          transactions=self.transactions,
+                          previousHash=last_block.hash)
+
+        proof = self.proof_of_work(new_block)
+        self.add_block(new_block, proof)
+        self.transactions = []
 
 
 app = Flask(__name__)
 blockchain = BlockChain()
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 @app.route('/chain', methods=["GET"])
@@ -106,5 +130,20 @@ def get_chain():
                        "chain": chain_data},
                       indent=4,
                       default=str)
+
+@app.route('/wallet/new', methods=['GET'])
+def new_wallet():
+    signing_key = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1, hashfunc=hashlib.sha256)
+    public_key = signing_key.get_verifying_key()
+
+    # print("private key:", binascii.hexlify((signing_key.to_string())))
+    # print("public key:", binascii.hexlify(public_key.to_string()))
+
+    response = {
+        'private_key': binascii.hexlify((signing_key.to_string())).decode('ascii'),
+        'public_key': binascii.hexlify((public_key.to_string())).decode('ascii')
+    }
+    return jsonify(response), 200
+
 
 app.run(debug=True, port=5000)

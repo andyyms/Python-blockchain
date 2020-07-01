@@ -26,8 +26,6 @@ my_pub_key = my_pri_key.get_verifying_key()
 
 print(f'my_pri_key: {my_pri_key} and my_pub_key: {my_pub_key}')
 
-tran = Transaction(my_pub_key)
-
 
 
 
